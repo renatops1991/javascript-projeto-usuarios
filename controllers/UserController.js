@@ -6,6 +6,18 @@ class UserController {
         this.tableEl = document.getElementById(tableId);
 
         this.onSubmit();
+        this.onEdit();
+
+    }
+
+    //método para cancelar a edição
+    onEdit() {
+
+        document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e => {
+
+            this.showPanelCreate();
+
+        });
 
     }
 
@@ -149,15 +161,55 @@ class UserController {
                 <td>${(dataUser.admin) ? 'Sim' : 'Não'}</td>
                 <td>${Utils.dateFormat(dataUser.register)}</td>
                 <td>
-                    <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
+                    <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
                     <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
                 </td>
             </tr>
         `;
 
+        tr.querySelector(".btn-edit").addEventListener("click", e => {
+
+            let json = JSON.parse(tr.dataset.user);
+            let form = document.querySelector("#form-user-update");
+
+            for (let name in json) {
+
+                let field = form.querySelector("[name=" + name.replace("_", "") + "]");
+
+                if (field) {
+                    
+                    if (field.type === 'file')
+                        continue;
+
+                    field.value = json[name];
+                    
+                }
+
+            }
+
+            this.showPanelUpdate();
+
+        });
+
         this.tableEl.appendChild(tr);
 
         this.updateCount();
+
+    }
+
+    //chamando o formulário para criar o usuário
+    showPanelCreate() {
+
+        document.querySelector("#box-user-create").style.display = "block";
+        document.querySelector("#box-user-update").style.display = "none";
+
+    }
+
+    //chamando o fomulário para editar o usuário
+    showPanelUpdate() {
+
+        document.querySelector("#box-user-create").style.display = "none";
+        document.querySelector("#box-user-update").style.display = "block";
 
     }
 
@@ -177,9 +229,9 @@ class UserController {
                 numberAdmin++;
 
         });
-        
-        document.querySelector("#number-users").innerHTML =  numberUsers;
-        document.querySelector("#number-users-admin").innerHTML =  numberAdmin;
+
+        document.querySelector("#number-users").innerHTML = numberUsers;
+        document.querySelector("#number-users-admin").innerHTML = numberAdmin;
 
     }
 
