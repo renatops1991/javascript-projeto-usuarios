@@ -50,23 +50,13 @@ class UserController {
                     result._photo = content;
                 }
 
-                tr.dataset.user = JSON.stringify(result);
+                let user = new User();
 
-                tr.innerHTML = `
-                <tr>
-                    <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
-                    <td>${result._name}</td>
-                    <td>${result._email}</td>
-                    <td>${(result._admin) ? 'Sim' : 'Não'}</td>
-                    <td>${Utils.dateFormat(result._register)}</td>
-                    <td>
-                        <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
-                        <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-                    </td>
-                </tr>
-            `;
+                user.loadFromJSON(result);
 
-                this.addEventsTr(tr);
+                user.save();
+
+                this.getTr(user, tr);
 
                 this.updateCount();
 
@@ -105,7 +95,7 @@ class UserController {
 
                 values.photo = content;
 
-                this.insert(values);
+                values.save();
 
                 this.addLine(values);
 
@@ -211,26 +201,10 @@ class UserController {
 
     }
 
-    //verificando se existe dados no sessionStorage
-    getUsersStorage() {
-
-        let users = [];
-
-        if (localStorage.getItem("users")) {
-
-            users = JSON.parse(localStorage.getItem("users"));
-
-        }
-
-        return users;
-
-
-    }
-
     //método responsável por listar todos os dados que estão nosso sessionStorage
     selectAll() {
 
-        let users = this.getUsersStorage();
+        let users = User.getUsersStorage();
 
         users.forEach(dataUser => {
 
@@ -244,22 +218,22 @@ class UserController {
 
     }
 
-    //método responsável por inserir os dados no sessionStorage
-    insert(data) {
-
-        let users = this.getUsersStorage();
-
-        users.push(data);
-
-        //sessionStorage.setItem("users", JSON.stringify(users));
-        localStorage.setItem("users", JSON.stringify(users));
-
-    }
-
     //método que adiciona os dados na tabela
     addLine(dataUser) {
 
-        let tr = document.createElement('tr');
+        let tr = this.getTr(dataUser);
+
+        this.tableEl.appendChild(tr);
+
+        this.updateCount();
+
+    }
+
+    //método que faz a construção da tabela
+    getTr(dataUser, tr = null) {
+
+        if (tr === null)
+            tr = document.createElement('tr');
 
         tr.dataset.user = JSON.stringify(dataUser);
 
@@ -279,9 +253,7 @@ class UserController {
 
         this.addEventsTr(tr);
 
-        this.tableEl.appendChild(tr);
-
-        this.updateCount();
+        return tr;
 
     }
 
@@ -293,7 +265,14 @@ class UserController {
 
             if (confirm("Deseje realmente excluir?")) {
 
+                let user = new User();
+                
+                user.loadFromJSON(JSON.parse(tr.dataset.user));
+                
+                user.remove();
+
                 tr.remove();
+                
                 this.updateCount();
 
             }

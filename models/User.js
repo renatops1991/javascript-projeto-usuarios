@@ -2,6 +2,7 @@ class User {
 
     constructor(name, gender, birth, country, email, password, photo, admin) {
 
+        this._id;
         this._name = name;
         this._gender = gender;
         this._birth = birth;
@@ -15,6 +16,10 @@ class User {
     }
 
     //método get()
+    get id() {
+        return this._id;
+    }
+
     get name() {
         return this._name;
     }
@@ -70,6 +75,87 @@ class User {
             }
 
         }
+
+    }
+
+    //metodo statico responsavel por retornar todos os usuarios cadastrados
+    static getUsersStorage() {
+
+        let users = [];
+
+        if (localStorage.getItem("users")) {
+
+            users = JSON.parse(localStorage.getItem("users"));
+
+        }
+
+        return users;
+
+    }
+
+    //metodo responsavel por gerar novos IDs
+    getNewID() {
+
+        let usersID = parseInt(localStorage.getItem("usersID"));
+
+        if (!usersID > 0)
+            usersID = 0;
+
+        usersID++;
+
+        localStorage.setItem("usersID", usersID);
+
+        return usersID;
+
+    }
+
+    //metodo responsavel por salvar os dados no localStorage
+    save() {
+
+        let users = User.getUsersStorage();
+
+        if (this.id > 0) {
+
+            users.map(u => {
+
+                if (u._id == this.id) {
+
+                    Object.assign(u, this);
+
+                }
+
+                return u;
+
+            });
+
+        } else {
+
+            this._id = this.getNewID();
+
+            users.push(this);
+
+        }
+
+        localStorage.setItem("users", JSON.stringify(users));
+
+    }
+
+    //metodo para remover os dados do localStore
+    remove() {
+
+        let users = User.getUsersStorage();
+
+        users.forEach((userData, index) => {
+
+            if (this._id == userData._id) {
+
+                users.splice(index, 1);
+
+            }
+
+        });
+
+        localStorage.setItem("users", JSON.stringify(users));
 
     }
 
